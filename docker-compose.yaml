@@ -1,0 +1,17 @@
+version: '3'
+
+networks:
+  default:
+    external:
+      name: "captalys"
+
+services:
+  db:
+    container_name: url-shortener-db
+    image: postgres:11.8-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: url-shortener
