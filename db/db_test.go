@@ -54,3 +54,8 @@ func TestConnect(t *testing.T) {
 	}
 
 }
+
+func TestHealthcheckDB(t *testing.T) {
+	Connect(gorm.Open)
+	assert.Equal(t, true, HealthcheckDB(), "Everything should be fine!")
+}
