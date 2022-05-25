@@ -1,6 +1,6 @@
 # Project's Purpose
 
-This is a sample API created to test the process of developing and deploying APIs using golang and it's tools. Created by [Hector Menezes](https://github.com/HectorMenezes).
+This is a sample API created to test the process of developing and deploying APIs using golang and its tools. Created by [Hector Menezes](https://github.com/HectorMenezes).
 
 
 # Local Setup
