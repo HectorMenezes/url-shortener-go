@@ -15,43 +15,51 @@ import (
 var db *gorm.DB
 var err error
 
-func Connect() {
+// sqlOpener represents the type gorm.Open. Used to mock database.
+type sqlOpener func(string, ...interface{}) (*gorm.DB, error)
+
+// Connect performs the connectino to database and binds it
+// to local var.
+func Connect(open sqlOpener) error {
 	log.Println("Starting Database...")
 
-	user := utils.GetEnv("POSTGRES_USER", "")
-	password := utils.GetEnv("POSTGRES_PASSWORD", "")
-	host := utils.GetEnv("POSTGRES_HOST", "")
-	port := utils.GetEnv("POSTGRES_PORT", "")
-	database := utils.GetEnv("POSTGRES_DB", "")
+	db, err = open("postgres", fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+		utils.GetEnv("POSTGRES_USER", ""),
+		utils.GetEnv("POSTGRES_PASSWORD", ""),
+		utils.GetEnv("POSTGRES_HOST", ""),
+		utils.GetEnv("POSTGRES_PORT", ""),
+		utils.GetEnv("POSTGRES_DB", ""),
+	))
 
-	dbinfo := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
-		user,
-		password,
-		host,
-		port,
-		database,
-	)
-	fmt.Print(dbinfo)
-	db, err = gorm.Open("postgres", dbinfo)
 	if err != nil {
 		log.Println("Failed to connect to database")
-		panic(err)
+		return fmt.Errorf(err.Error())
 	}
 
 	log.Println("Database connected")
+	return nil
 }
 
-func Init() {
-	Connect()
+// Migrate perferm all migrations based on models.
+func Migrate() error {
+
+	if db == (*gorm.DB)(nil) {
+		return fmt.Errorf("database not connected")
+	}
+
 	if !db.HasTable(&models.Url{}) {
-		err := db.CreateTable(&models.Url{})
-		if err != nil {
-			log.Println("Table already exists")
-		}
+		db.CreateTable(&models.Url{})
 	}
 	db.AutoMigrate(&models.Url{})
+	return nil
 }
 
+// GetDB return the current database connection.
 func GetDB() *gorm.DB {
 	return db
+}
+
+// HealthcheckDB is a routine to check health of service.
+func HealthcheckDB() bool {
+	return GetDB().DB().Ping() == nil
 }

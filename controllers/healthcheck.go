@@ -3,26 +3,27 @@ package url
 import (
 	"net/http"
 
-	"github.com/HectorMenezes/url-shortener-go/db"
-
 	"github.com/gin-gonic/gin"
 )
 
-func GetHealthCheck(c *gin.Context) {
-	type test struct {
-		attr int
-	}
-	var t test
-	db.GetDB().Raw("SELECT 1").Scan(&t)
+// ServiceChecker represents a routine to check
+// the health of a service.
+type ServiceChecker struct {
+	Name          string
+	HealthChecker func() bool
+}
 
-	if t.attr != 0 {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to access the database service.",
-		})
-	} else {
-		c.IndentedJSON(http.StatusOK, gin.H{
-			"message": "Service OK!",
-		})
+// GetHealthCheck evaluates the state of service.
+// Returns a gin's HandlerFunc with structure `{"service": "status"}`.
+func GetHealthCheck(checkers []ServiceChecker) func(c *gin.Context) {
+	m := make(map[string]bool)
+
+	for _, function := range checkers {
+		m[function.Name] = function.HealthChecker()
+	}
+
+	return func(c *gin.Context) {
+		c.JSON(http.StatusOK, m)
 	}
 
 }

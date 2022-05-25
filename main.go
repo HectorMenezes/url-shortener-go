@@ -2,34 +2,37 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	url "github.com/HectorMenezes/url-shortener-go/controllers"
 	db "github.com/HectorMenezes/url-shortener-go/db"
+	"github.com/jinzhu/gorm"
 
 	"github.com/gin-gonic/gin"
 )
 
+// main connects to database, perform migrations and set
+// all routes of app.
 func main() {
 	log.Println("Starting server...")
-
-	db.Init()
+	db.Connect(gorm.Open)
+	db.Migrate()
+	defer db.GetDB().Close()
 
 	router := gin.Default()
-	shortener := router.Group("/shortener", func(c *gin.Context) {
-		auth := c.Request.Header.Get("Authorization")
-		if auth == "" {
-			c.String(http.StatusForbidden, "No Authorization header provided")
-			c.Abort()
-			return
-		}
-	})
+
+	shortener := router.Group("/shortener", url.AuthMiddleware)
 	shortener.GET("/", url.GetUrls)
 	shortener.POST("/", url.CreateUrl)
 	shortener.GET("/:urlId", url.GetUrl)
 
 	healthCheck := router.Group("/healthcheck")
-	healthCheck.GET("/", url.GetHealthCheck)
+
+	healthCheck.GET("/", url.GetHealthCheck([]url.ServiceChecker{
+		{
+			Name:          "database",
+			HealthChecker: db.HealthcheckDB,
+		},
+	}))
 
 	router.Run()
 }
