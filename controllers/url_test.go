@@ -11,6 +11,7 @@ import (
 	"github.com/HectorMenezes/url-shortener-go/db"
 	"github.com/HectorMenezes/url-shortener-go/models"
 	"github.com/HectorMenezes/url-shortener-go/utils"
+	"github.com/HectorMenezes/url-shortener-go/cache"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
@@ -18,6 +19,7 @@ import (
 
 func SetupTestRoutes() *gin.Engine {
 	db.Connect(gorm.Open)
+    cache.Start()
 
 	db.Migrate()
 

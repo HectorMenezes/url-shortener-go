@@ -3,8 +3,10 @@ package url
 import (
 	"fmt"
 	"net/http"
+    "encoding/json"
 
 	"github.com/HectorMenezes/url-shortener-go/db"
+	"github.com/HectorMenezes/url-shortener-go/cache"
 	"github.com/HectorMenezes/url-shortener-go/models"
 	"github.com/HectorMenezes/url-shortener-go/utils"
 
@@ -25,16 +27,34 @@ func GetUrls(c *gin.Context) {
 // GetUrl redirect to a url based on hash id.
 func GetUrl(c *gin.Context) {
 	urlId := c.Param("urlId")
-	var url models.Url
-	db := db.GetDB()
 
-	if err := db.Where("id = ?", urlId).First(&url).Error; err != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"message": "Url not found!",
-		})
-		return
-	}
-	c.Redirect(http.StatusTemporaryRedirect, url.Url)
+    cache := cache.GetCache()
+
+    items, ok := cache.Read(urlId)
+    var url models.Url
+
+    if !ok {
+        db := db.GetDB()
+
+        if err := db.Where("id = ?", urlId).First(&url).Error; err != nil {
+            c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+                "message": "Url not found!",
+            })
+            return
+        }
+        cache.Update(urlId, url)
+
+    } else {
+        err := json.Unmarshal(items, &url)
+        if err != nil {
+            c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+                "message": "Internal error!",
+            })
+            return
+        }
+    }
+    c.Redirect(http.StatusTemporaryRedirect, url.Url)
+
 }
 
 // CreateUrl validates the payload and then inset into database.
