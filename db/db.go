@@ -3,11 +3,9 @@ package db
 import (
 	"fmt"
 	"log"
-
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/lib/pq"
-
 	models "github.com/HectorMenezes/url-shortener-go/models"
 	utils "github.com/HectorMenezes/url-shortener-go/utils"
 )

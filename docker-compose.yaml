@@ -1,17 +1,33 @@
 version: '3'
 
 networks:
-  default:
-    external:
-      name: "captalys"
+  url-shortener:
+    driver: bridge
 
 services:
   db:
     container_name: url-shortener-db
-    image: postgres:11.8-alpine
+    image: postgres:15-alpine
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
-      POSTGRES_DB: url-shortener
+    env_file:
+      - db.env
+    networks:
+      - url-shortener
+  api:
+    container_name: url-shortener-api
+    build:
+      dockerfile: Dockerfile
+      context: .
+    env_file:
+      - api.env
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    links:
+      - db
+    depends_on:
+      - db
+    networks:
+      - url-shortener
