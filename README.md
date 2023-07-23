@@ -29,6 +29,12 @@ SHORTENER_BASE_URL=hm
 ## Running
 To run locally, you'll only need to run with:
 
-```shell
-$ docker-compose up
+```bash
+docker-compose up
+```
+
+## Testing
+Once the API container is running, just execute
+```bash
+docker exec -it url-shortener-api go test ./...
 ```
