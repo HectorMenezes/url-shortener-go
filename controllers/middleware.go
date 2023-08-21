@@ -7,6 +7,7 @@ import (
 )
 
 // AuthMiddleware verifies if the request has an Authorization header
+// TODO: check how to do this auth
 func AuthMiddleware(c *gin.Context) {
 	auth := c.Request.Header.Get("Authorization")
 	if auth == "" {

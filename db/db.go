@@ -13,7 +13,7 @@ import (
 var db *gorm.DB
 var err error
 
-// sqlOpener represents the type gorm.Open. Used to mock database.
+// sqlOpener represents the type gorm.Open. 
 type sqlOpener func(string, ...interface{}) (*gorm.DB, error)
 
 // Connect performs the connectino to database and binds it

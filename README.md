@@ -38,3 +38,6 @@ Once the API container is running, just execute
 ```bash
 docker exec -it url-shortener-api go test ./...
 ```
+
+## Swagger UI
+The swagger will be available at `http://host:port/swagger/index.html`.

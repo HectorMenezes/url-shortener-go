@@ -131,7 +131,7 @@ func TestCreateUrl(t *testing.T) {
 			response := httptest.NewRecorder()
 			router.ServeHTTP(response, req)
 
-			var url models.UlrResponsePost
+			var url models.UrlResponse
 			json.Unmarshal(response.Body.Bytes(), &url)
 
 			assert.Equal(t, test.expectedCode, response.Code, fmt.Sprintf("Expected: %d got %d", test.expectedCode, response.Code))
